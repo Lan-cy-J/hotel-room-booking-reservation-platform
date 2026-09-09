@@ -1,0 +1,430 @@
+{
+  "info": {
+    "name": "P03 — Hotel Room Booking & Reservation Platform",
+    "_postman_id": "c1f6c49e-7db2-482a-a53b-e8544dcf4567",
+    "description": "Comprehensive Postman collection for testing all 13 modules of the Hotel Room Booking & Reservation Platform (CIA-3 Backend).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000/api", "type": "string" },
+    { "key": "guestToken", "value": "", "type": "string" },
+    { "key": "staffNYToken", "value": "", "type": "string" },
+    { "key": "staffLAToken", "value": "", "type": "string" },
+    { "key": "adminToken", "value": "", "type": "string" },
+    { "key": "hotelId", "value": "", "type": "string" },
+    { "key": "roomTypeId", "value": "", "type": "string" },
+    { "key": "roomId", "value": "", "type": "string" },
+    { "key": "bookingId", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "01. Health & Status",
+      "item": [
+        {
+          "name": "System Health Check (List 13 Modules)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/health", "host": ["{{baseUrl}}"], "path": ["health"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "02. Authentication (Module 1)",
+      "item": [
+        {
+          "name": "Register Guest",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"guest123\",\n  \"phone\": \"+1 (415) 555-2345\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] }
+          }
+        },
+        {
+          "name": "Login - Guest",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": ["var jsonData = pm.response.json();", "if(jsonData.data && jsonData.data.token) { pm.environment.set('guestToken', jsonData.data.token); }"]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"guest123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Login - Staff (NY)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"staff.ny@hotelchain.com\",\n  \"password\": \"staff123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Login - Admin",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@hotelchain.com\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Get Authenticated User Profile",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{guestToken}}" }],
+            "url": { "raw": "{{baseUrl}}/auth/profile", "host": ["{{baseUrl}}"], "path": ["auth", "profile"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "03. Hotels & Properties (Module 2)",
+      "item": [
+        {
+          "name": "List All Active Hotels (Public)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/hotels", "host": ["{{baseUrl}}"], "path": ["hotels"] }
+          }
+        },
+        {
+          "name": "Filter Hotels by City (Public)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/hotels?city=New York", "host": ["{{baseUrl}}"], "path": ["hotels"], "query": [{ "key": "city", "value": "New York" }] }
+          }
+        },
+        {
+          "name": "Create Hotel Property (Admin Only)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Emerald Bay Resort\",\n  \"city\": \"San Francisco\",\n  \"address\": \"450 Bay Street, CA 94133\",\n  \"amenities\": [\"Bay View\", \"WiFi\", \"Heated Pool\", \"Valet\"],\n  \"rating\": 4.7,\n  \"contactEmail\": \"bay@emeraldsf.com\",\n  \"contactPhone\": \"+1 (415) 555-8899\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/hotels", "host": ["{{baseUrl}}"], "path": ["hotels"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "04. Room Types & Inventory (Module 3)",
+      "item": [
+        {
+          "name": "Get Room Types by Hotel (Public)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/hotels/{{hotelId}}/room-types", "host": ["{{baseUrl}}"], "path": ["hotels", "{{hotelId}}", "room-types"] }
+          }
+        },
+        {
+          "name": "Create Room Type (Admin Only)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Penthouse Skyline Suite\",\n  \"description\": \"Top-floor panoramic suite with terrace and jacuzzi\",\n  \"basePrice\": 450,\n  \"capacity\": 4,\n  \"totalRooms\": 3,\n  \"amenities\": [\"Terrace\", \"Jacuzzi\", \"King Bed\", \"Complimentary Champagne\"]\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/hotels/{{hotelId}}/room-types", "host": ["{{baseUrl}}"], "path": ["hotels", "{{hotelId}}", "room-types"] }
+          }
+        },
+        {
+          "name": "List Physical Rooms (Staff Scoped / Admin)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{staffNYToken}}" }],
+            "url": { "raw": "{{baseUrl}}/rooms", "host": ["{{baseUrl}}"], "path": ["rooms"] }
+          }
+        },
+        {
+          "name": "Add Physical Room (Staff Scoped / Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{staffNYToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hotelId\": \"{{hotelId}}\",\n  \"roomTypeId\": \"{{roomTypeId}}\",\n  \"roomNumber\": \"105\",\n  \"floor\": 1,\n  \"housekeepingStatus\": \"clean\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/rooms", "host": ["{{baseUrl}}"], "path": ["rooms"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "05. Dynamic Pricing Rules (Module 6)",
+      "item": [
+        {
+          "name": "List All Pricing Rules (Admin Only)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": { "raw": "{{baseUrl}}/pricing-rules", "host": ["{{baseUrl}}"], "path": ["pricing-rules"] }
+          }
+        },
+        {
+          "name": "Create Seasonal Multiplier Rule (Admin Only)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hotelId\": \"{{hotelId}}\",\n  \"name\": \"Holiday Weekend Premium\",\n  \"season\": \"holiday\",\n  \"startDate\": \"2026-12-20\",\n  \"endDate\": \"2027-01-05\",\n  \"multiplier\": 1.35\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/pricing-rules", "host": ["{{baseUrl}}"], "path": ["pricing-rules"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "06. Availability Search Engine (Module 4)",
+      "item": [
+        {
+          "name": "Search Available Rooms (by City, Dates, Guests)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/availability/search?city=New York&checkIn=2026-10-15&checkOut=2026-10-18&guests=2",
+              "host": ["{{baseUrl}}"],
+              "path": ["availability", "search"],
+              "query": [
+                { "key": "city", "value": "New York" },
+                { "key": "checkIn", "value": "2026-10-15" },
+                { "key": "checkOut", "value": "2026-10-18" },
+                { "key": "guests", "value": "2" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Check Single Room Type Remaining Availability",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/availability/check?roomTypeId={{roomTypeId}}&checkIn=2026-10-15&checkOut=2026-10-18",
+              "host": ["{{baseUrl}}"],
+              "path": ["availability", "check"],
+              "query": [
+                { "key": "roomTypeId", "value": "{{roomTypeId}}" },
+                { "key": "checkIn", "value": "2026-10-15" },
+                { "key": "checkOut", "value": "2026-10-18" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "07. Booking Workflow & Status FSM (Modules 5 & 7)",
+      "item": [
+        {
+          "name": "Create Reservation (Guest)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{guestToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hotelId\": \"{{hotelId}}\",\n  \"roomTypeId\": \"{{roomTypeId}}\",\n  \"checkIn\": \"2026-10-15\",\n  \"checkOut\": \"2026-10-18\",\n  \"guestCount\": 2\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/bookings", "host": ["{{baseUrl}}"], "path": ["bookings"] }
+          }
+        },
+        {
+          "name": "Confirm Reservation (Reserved -> Confirmed)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{guestToken}}" }],
+            "url": { "raw": "{{baseUrl}}/bookings/{{bookingId}}/confirm", "host": ["{{baseUrl}}"], "path": ["bookings", "{{bookingId}}", "confirm"] }
+          }
+        },
+        {
+          "name": "Get Single Booking Details",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{guestToken}}" }],
+            "url": { "raw": "{{baseUrl}}/bookings/{{bookingId}}", "host": ["{{baseUrl}}"], "path": ["bookings", "{{bookingId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "08. Operations: Check-in, Check-out & Housekeeping (Modules 8 & 9)",
+      "item": [
+        {
+          "name": "Check-in Guest (Assign Clean Room)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{staffNYToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"assignedRoomId\": \"{{roomId}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/bookings/{{bookingId}}/checkin", "host": ["{{baseUrl}}"], "path": ["bookings", "{{bookingId}}", "checkin"] }
+          }
+        },
+        {
+          "name": "Check-out Guest (Sets Room to Dirty)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{staffNYToken}}" }],
+            "url": { "raw": "{{baseUrl}}/bookings/{{bookingId}}/checkout", "host": ["{{baseUrl}}"], "path": ["bookings", "{{bookingId}}", "checkout"] }
+          }
+        },
+        {
+          "name": "List Housekeeping Statuses",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{staffNYToken}}" }],
+            "url": { "raw": "{{baseUrl}}/housekeeping/rooms", "host": ["{{baseUrl}}"], "path": ["housekeeping", "rooms"] }
+          }
+        },
+        {
+          "name": "Update Room Housekeeping Status (Dirty -> Clean)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{staffNYToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"housekeepingStatus\": \"clean\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/housekeeping/rooms/{{roomId}}/status", "host": ["{{baseUrl}}"], "path": ["housekeeping", "rooms", "{{roomId}}", "status"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "09. Cancellation & Refunds (Module 10)",
+      "item": [
+        {
+          "name": "Cancel Booking (Calculates Tiered Refund)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{guestToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Flight cancelled by airline\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/bookings/{{bookingId}}/cancel", "host": ["{{baseUrl}}"], "path": ["bookings", "{{bookingId}}", "cancel"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. Guest Booking History (Module 11)",
+      "item": [
+        {
+          "name": "View My Booking History (Guest Scoped)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{guestToken}}" }],
+            "url": { "raw": "{{baseUrl}}/bookings/my-bookings", "host": ["{{baseUrl}}"], "path": ["bookings", "my-bookings"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "11. Invoices (Module 12)",
+      "item": [
+        {
+          "name": "Get Itemized Invoice Summary",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{guestToken}}" }],
+            "url": { "raw": "{{baseUrl}}/invoices/{{bookingId}}", "host": ["{{baseUrl}}"], "path": ["invoices", "{{bookingId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "12. Admin Reports & Analytics (Module 13)",
+      "item": [
+        {
+          "name": "Occupancy Report (Aggregation)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/reports/occupancy?startDate=2026-09-01&endDate=2026-10-31",
+              "host": ["{{baseUrl}}"],
+              "path": ["reports", "occupancy"],
+              "query": [
+                { "key": "startDate", "value": "2026-09-01" },
+                { "key": "endDate", "value": "2026-10-31" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Revenue Report (Aggregation)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/reports/revenue?startDate=2026-01-01&endDate=2026-12-31",
+              "host": ["{{baseUrl}}"],
+              "path": ["reports", "revenue"],
+              "query": [
+                { "key": "startDate", "value": "2026-01-01" },
+                { "key": "endDate", "value": "2026-12-31" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Executive Dashboard Summary",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": { "raw": "{{baseUrl}}/reports/dashboard", "host": ["{{baseUrl}}"], "path": ["reports", "dashboard"] }
+          }
+        }
+      ]
+    }
+  ]
+}
