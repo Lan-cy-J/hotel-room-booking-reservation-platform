@@ -18,10 +18,12 @@ const {
 const { generateBookingNumber } = require('../utils/bookingNumberGenerator');
 const { normalizeDate } = require('../utils/dateUtils');
 
-const seedData = async () => {
+const seedData = async (exitOnComplete = true) => {
   try {
     console.log('[Seeder] Connecting to database...');
-    await connectDB();
+    if (mongoose.connection.readyState !== 1) {
+      await connectDB();
+    }
 
     console.log('[Seeder] Purging existing collections...');
     await Booking.deleteMany({});
@@ -375,10 +377,15 @@ const seedData = async () => {
     console.log(' 5. Guest:   alice.smith@example.com   / guest123');
     console.log('==========================================================\n');
 
-    process.exit(0);
+    if (exitOnComplete) {
+      process.exit(0);
+    }
   } catch (error) {
     console.error('[Seeder] Error populating database:', error);
-    process.exit(1);
+    if (exitOnComplete) {
+      process.exit(1);
+    }
+    throw error;
   }
 };
 
@@ -400,8 +407,15 @@ const destroyData = async () => {
   }
 };
 
-if (process.argv[2] === '--destroy') {
-  destroyData();
-} else {
-  seedData();
+module.exports = {
+  seedData,
+  destroyData
+};
+
+if (require.main === module) {
+  if (process.argv[2] === '--destroy') {
+    destroyData();
+  } else {
+    seedData(true);
+  }
 }

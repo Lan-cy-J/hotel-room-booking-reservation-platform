@@ -9,6 +9,15 @@ const startServer = async () => {
     // Connect to Database
     await connectDB();
 
+    // Auto-seed demo data if database is empty (e.g. In-Memory fallback mode)
+    const User = require('./models/User');
+    const userCount = await User.countDocuments();
+    if (userCount === 0) {
+      console.log('[Server] Database is empty. Seeding initial demo data...');
+      const { seedData } = require('./seed/seeder');
+      await seedData(false);
+    }
+
     const server = app.listen(PORT, () => {
       console.log(`[Server] Running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
       console.log(`[Server] API Base URL: http://localhost:${PORT}/api`);
