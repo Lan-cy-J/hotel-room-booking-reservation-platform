@@ -1,140 +1,357 @@
-# P03 — Hotel Room Booking & Reservation Platform
+# AuraStays — Hotel Room Booking & Reservation Platform
 
-> **5th Semester CIA-3 Backend Project**  
-> **Domain:** Hospitality & Tourism  
-> **Stack:** Node.js, Express.js, MongoDB (Mongoose), JWT, Joi, Bcrypt
-
----
-
-## 📋 Table of Contents
-1. [Project Overview](#project-overview)
-2. [Team Details](#team-details)
-3. [System Architecture](#system-architecture)
-4. [Folder Structure](#folder-structure)
-5. [Mandatory 13 Modules Breakdown](#mandatory-13-modules-breakdown)
-6. [Database Schema & Indexes](#database-schema--indexes)
-7. [Core Business Logic & Algorithms](#core-business-logic--algorithms)
-8. [Role-Based Access & Scoping Matrix](#role-based-access--scoping-matrix)
-9. [Complete API Route Catalog](#complete-api-route-catalog)
-10. [Setup & Installation Guide](#setup--installation-guide)
-11. [Postman Testing & Seed Data](#postman-testing--seed-data)
-12. [Viva Questions & Defense Guide](#viva-questions--defense-guide)
+> P03 — 5th Semester CIA-3 Full-Stack Project
+> Domain: Hospitality & Tourism
+> Application: Multi-property Hotel Booking & Reservation Platform
 
 ---
 
-## 🏨 Project Overview
+## Table of Contents
 
-The **Hotel Room Booking & Reservation Platform (P03)** is a backend system designed for multi-property hotel chains. It delivers end-to-end functionality for:
-- **Guests**: Real-time room availability discovery, dynamic pricing estimation, atomic reservations, booking lifecycle management, self-service cancellations, and itemized invoice generation.
-- **Hotel Staff**: Physical room inventory management, front-desk check-in/check-out with cleanliness verification, and housekeeping state tracking.
-- **Administrators**: Hotel property provisioning, room type configuration, seasonal dynamic pricing rules, and real-time MongoDB aggregation reports for occupancy and revenue.
+* [Project Overview](#project-overview)
+* [Key Features](#key-features)
+* [Technology Stack](#technology-stack)
+* [System Architecture](#system-architecture)
+* [Application Roles](#application-roles)
+* [Project Structure](#project-structure)
+* [Core Modules](#core-modules)
+* [Database Design](#database-design)
+* [Core Business Logic](#core-business-logic)
+* [Frontend](#frontend)
+* [API Documentation](#api-documentation)
+* [Authentication & Authorization](#authentication--authorization)
+* [Setup & Installation](#setup--installation)
+* [Running the Application](#running-the-application)
+* [Demo Accounts](#demo-accounts)
+* [Seed Data](#seed-data)
+* [Testing](#testing)
+* [Postman Collection](#postman-collection)
+* [API Response Format](#api-response-format)
+* [Security](#security)
+* [Viva / Technical Highlights](#viva--technical-highlights)
+* [Future Enhancements](#future-enhancements)
+* [Project Status](#project-status)
 
 ---
 
-## 👥 Team Details
+## Project Overview
 
-| Roll Number | Student Name | Role / Contributions |
-|---|---|---|
-| *[Your Roll No]* | *[Your Name]* | Core Architecture, Availability Engine & FSM |
-| *[Partner Roll No]* | *[Partner Name]* | Dynamic Pricing, Reports & Postman Suite |
+AuraStays is a full-stack hotel room booking and reservation platform designed to manage multiple hotel properties from a single system.
 
----
+The platform supports the complete hotel reservation lifecycle:
 
-## 🏛️ System Architecture
-
-The application implements a layered **MVC architecture with an isolated Service Layer** for pure business logic:
-
-```
-                          ┌────────────────────────┐
-                          │   Client / Postman     │
-                          └───────────┬────────────┘
-                                      │ HTTP / JSON
-                                      ▼
-                          ┌────────────────────────┐
-                          │     Express Router     │
-                          └───────────┬────────────┘
-                                      │
-                                      ▼
-                          ┌────────────────────────┐
-                          │   Middleware Layer     │
-                          │ - authenticateJWT      │
-                          │ - authorizeRoles       │
-                          │ - scopeHotelStaff      │
-                          │ - validateRequest(Joi) │
-                          └───────────┬────────────┘
-                                      │
-                                      ▼
-                          ┌────────────────────────┐
-                          │   Controllers Layer    │
-                          │ (HTTP extraction & res)│
-                          └───────────┬────────────┘
-                                      │
-                                      ▼
-                          ┌────────────────────────┐
-                          │     Service Layer      │
-                          │ (Availability, Pricing,│
-                          │  FSM, Refunds, Reports)│
-                          └───────────┬────────────┘
-                                      │
-                                      ▼
-                          ┌────────────────────────┐
-                          │     Mongoose Models    │
-                          │ (Validation & Indexes) │
-                          └───────────┬────────────┘
-                                      │
-                                      ▼
-                          ┌────────────────────────┐
-                          │   MongoDB Database     │
-                          └────────────────────────┘
+```text
+Guest Registration
+       |
+       v
+Hotel & Room Discovery
+       |
+       v
+Availability Search
+       |
+       v
+Dynamic Price Calculation
+       |
+       v
+Reservation
+       |
+       v
+Confirmation
+       |
+       v
+Check-in
+       |
+       v
+Stay
+       |
+       v
+Check-out
+       |
+       v
+Invoice / Booking History
 ```
 
+The system is designed around three primary user roles:
+
+* Guest — searches hotels, checks availability, creates reservations, views bookings, cancels reservations, and accesses invoices.
+* Staff — manages physical rooms, housekeeping status, check-ins, and check-outs for their assigned hotel.
+* Admin — manages properties, room types, pricing rules, and platform-wide analytics.
+
+The backend follows a layered architecture separating routes, middleware, controllers, services, models, and database operations.
+
+```text
+Routes
+  |
+  v
+Middleware
+  |
+  v
+Controllers
+  |
+  v
+Services
+  |
+  v
+Models
+  |
+  v
+MongoDB
+```
+
+The frontend communicates with the REST API through a centralized API client and provides separate interfaces for guests, hotel staff, and administrators.
+
 ---
 
-## 📁 Folder Structure
+## Key Features
 
+### Guest Features
+
+* Guest registration and login
+* JWT-based authentication
+* Hotel discovery
+* City-based hotel search
+* Room type browsing
+* Room availability checking
+* Guest-capacity filtering
+* Dynamic pricing preview
+* Reservation creation
+* Automatic booking number generation
+* Booking confirmation
+* Booking history
+* Booking cancellation
+* Refund calculation
+* Itemized invoice generation
+* Protected access to personal bookings
+
+### Staff Features
+
+* Hotel-scoped authentication
+* Front-desk dashboard
+* View active reservations
+* Assign physical rooms during check-in
+* Cleanliness verification before check-in
+* Guest check-in
+* Guest check-out
+* Automatic room status update after checkout
+* Housekeeping dashboard
+* Room housekeeping status management
+* Prevention of cross-hotel inventory access
+
+### Admin Features
+
+* Executive dashboard
+* Platform-wide KPI overview
+* Hotel/property management
+* Room type management
+* Physical room inventory visibility
+* Dynamic pricing rule management
+* Occupancy reports
+* Revenue reports
+* MongoDB aggregation-based analytics
+* Global access across hotel properties
+
+---
+
+## Technology Stack
+
+### Frontend
+
+| Technology      | Purpose                     |
+| --------------- | --------------------------- |
+| React 18        | UI framework                |
+| Vite            | Frontend build tool         |
+| React Router    | Client-side routing         |
+| Lucide React    | UI icons                    |
+| Canvas Confetti | Booking success interaction |
+| CSS             | Custom responsive UI        |
+
+### Backend
+
+| Technology | Purpose                   |
+| ---------- | ------------------------- |
+| Node.js    | Runtime                   |
+| Express.js | REST API framework        |
+| Mongoose   | MongoDB ODM               |
+| MongoDB    | Database                  |
+| JWT        | Authentication            |
+| Bcrypt.js  | Password hashing          |
+| Joi        | Request validation        |
+| Helmet     | HTTP security headers     |
+| CORS       | Cross-origin support      |
+| Morgan     | HTTP request logging      |
+| Dotenv     | Environment configuration |
+
+### Testing and Development
+
+| Tool                  | Purpose                    |
+| --------------------- | -------------------------- |
+| Node.js Test Runner   | End-to-end testing         |
+| MongoDB Memory Server | In-memory database testing |
+| Nodemon               | Development server         |
+| Postman               | API testing                |
+
+---
+
+## System Architecture
+
+```text
+                    +-------------------------+
+                    |      React Frontend     |
+                    |       Vite + React      |
+                    +------------+------------+
+                                 |
+                            HTTP / JSON
+                                 |
+                                 v
+                    +-------------------------+
+                    |      Express Router     |
+                    +------------+------------+
+                                 |
+                                 v
+                    +-------------------------+
+                    |     Middleware Layer    |
+                    |                         |
+                    | JWT Authentication      |
+                    | Role Authorization      |
+                    | Hotel Scoping           |
+                    | Joi Validation          |
+                    | Error Handling          |
+                    +------------+------------+
+                                 |
+                                 v
+                    +-------------------------+
+                    |    Controllers Layer    |
+                    |                         |
+                    | HTTP Request / Response |
+                    +------------+------------+
+                                 |
+                                 v
+                    +-------------------------+
+                    |      Service Layer      |
+                    |                         |
+                    | Availability            |
+                    | Booking / FSM           |
+                    | Pricing                 |
+                    | Cancellation / Refunds  |
+                    | Housekeeping            |
+                    | Invoices                |
+                    | Reports                 |
+                    +------------+------------+
+                                 |
+                                 v
+                    +-------------------------+
+                    |    Mongoose Models      |
+                    | Validation + Indexes     |
+                    +------------+------------+
+                                 |
+                                 v
+                    +-------------------------+
+                    |        MongoDB           |
+                    +-------------------------+
 ```
-c:\5BTCSDS\L&T\Hotel Room Booking & Reservation Platform\
+
+---
+
+## Application Roles
+
+| Feature               | Guest | Staff | Admin |
+| --------------------- | :---: | :---: | :---: |
+| View hotels           |  Yes  |  Yes  |  Yes  |
+| Search availability   |  Yes  |  Yes  |  Yes  |
+| Create bookings       |  Yes  |   No  |  Yes  |
+| View own bookings     |  Yes  |   No  |  Yes  |
+| View all bookings     |   No  |  Yes  |  Yes  |
+| Cancel bookings       |  Yes  |   No  |  Yes  |
+| Generate invoices     |  Yes  |  Yes  |  Yes  |
+| Manage physical rooms |   No  |  Yes  |  Yes  |
+| Manage housekeeping   |   No  |  Yes  |  Yes  |
+| Check-in guests       |   No  |  Yes  |  Yes  |
+| Check-out guests      |   No  |  Yes  |  Yes  |
+| Manage hotels         |   No  |   No  |  Yes  |
+| Manage room types     |   No  |   No  |  Yes  |
+| Manage pricing rules  |   No  |   No  |  Yes  |
+| Occupancy reports     |   No  |   No  |  Yes  |
+| Revenue reports       |   No  |   No  |  Yes  |
+| Executive dashboard   |   No  |   No  |  Yes  |
+
+### Staff Hotel Scoping
+
+Each staff member is associated with a specific hotel.
+
+For example:
+
+```text
+NY Staff
+   |
+   v
+Grand Palace Manhattan
+   |
+   v
+Can manage only NY rooms, bookings, and housekeeping
+```
+
+A staff member attempting to manipulate another hotel's inventory receives:
+
+```text
+403 Forbidden
+```
+
+---
+
+## Project Structure
+
+```text
+hotel-room-booking-reservation-platform/
+|
 ├── .env.example
 ├── .gitignore
 ├── package.json
+├── package-lock.json
 ├── README.md
-├── server.js                        # Server listener & graceful shutdown
-├── app.js                           # Express application & global middleware
+├── app.js
+├── server.js
+|
 ├── config/
-│   └── db.js                        # MongoDB connection with In-Memory fallback
+│   └── db.js
+|
 ├── models/
-│   ├── User.js                      # User schema with bcrypt hooks
-│   ├── Hotel.js                     # Hotel property schema
-│   ├── RoomType.js                  # Room types with capacity & base price
-│   ├── Room.js                      # Physical rooms with housekeeping states
-│   ├── PricingRule.js               # Seasonal dynamic multipliers
-│   ├── Booking.js                   # Bookings with locked pricing snapshots
-│   └── index.js                     # Model barrel export
+│   ├── User.js
+│   ├── Hotel.js
+│   ├── RoomType.js
+│   ├── Room.js
+│   ├── PricingRule.js
+│   ├── Booking.js
+│   └── index.js
+|
 ├── middleware/
-│   ├── auth.middleware.js           # JWT authentication
-│   ├── role.middleware.js           # Role checks & Staff hotel scoping
-│   ├── validate.middleware.js       # Joi request validation
-│   └── error.middleware.js          # Centralized error handler
+│   ├── auth.middleware.js
+│   ├── role.middleware.js
+│   ├── validate.middleware.js
+│   └── error.middleware.js
+|
 ├── validators/
 │   ├── auth.validator.js
 │   ├── hotel.validator.js
 │   ├── roomType.validator.js
 │   ├── room.validator.js
+│   ├── availability.validator.js
 │   ├── pricingRule.validator.js
 │   ├── booking.validator.js
 │   └── report.validator.js
+|
 ├── services/
 │   ├── auth.service.js
 │   ├── hotel.service.js
 │   ├── roomType.service.js
 │   ├── room.service.js
-│   ├── availability.service.js      # Date-overlap formula engine
-│   ├── pricing.service.js           # Dynamic multiplier & tax calculator
-│   ├── booking.service.js           # FSM lifecycle & race-condition check
-│   ├── housekeeping.service.js      # Cleanliness workflow
-│   ├── cancellation.service.js      # 3-tier refund policy engine
-│   ├── invoice.service.js           # Itemized breakdown generator
-│   └── report.service.js            # MongoDB aggregation pipelines
+│   ├── availability.service.js
+│   ├── pricing.service.js
+│   ├── booking.service.js
+│   ├── housekeeping.service.js
+│   ├── cancellation.service.js
+│   ├── invoice.service.js
+│   └── report.service.js
+|
 ├── controllers/
 │   ├── auth.controller.js
 │   ├── hotel.controller.js
@@ -146,6 +363,7 @@ c:\5BTCSDS\L&T\Hotel Room Booking & Reservation Platform\
 │   ├── housekeeping.controller.js
 │   ├── invoice.controller.js
 │   └── report.controller.js
+|
 ├── routes/
 │   ├── auth.routes.js
 │   ├── hotel.routes.js
@@ -157,214 +375,1525 @@ c:\5BTCSDS\L&T\Hotel Room Booking & Reservation Platform\
 │   ├── housekeeping.routes.js
 │   ├── invoice.routes.js
 │   ├── report.routes.js
-│   └── index.js                     # Router aggregator
+│   └── index.js
+|
 ├── utils/
-│   ├── apiResponse.js               # Standard JSON response envelope
-│   ├── apiError.js                  # Custom HTTP error class
-│   ├── constants.js                 # System enums & FSM transition rules
-│   ├── dateUtils.js                 # UTC normalization & date math
-│   └── bookingNumberGenerator.js    # BK-YYYYMMDD-XXXX generator
+│   ├── apiResponse.js
+│   ├── apiError.js
+│   ├── constants.js
+│   ├── dateUtils.js
+│   └── bookingNumberGenerator.js
+|
 ├── seed/
-│   └── seeder.js                    # Database demo seeder
+│   └── seeder.js
+|
 ├── test/
-│   └── e2e.test.js                  # Automated 13-module test suite
-└── postman/
-    └── Hotel_Reservation_Platform.postman_collection.json
+│   └── e2e.test.js
+|
+├── postman/
+│   └── Hotel_Reservation_Platform.postman_collection.json
+|
+└── client/
+    ├── index.html
+    ├── package.json
+    ├── package-lock.json
+    ├── vite.config.js
+    |
+    └── src/
+        ├── main.jsx
+        ├── App.jsx
+        ├── index.css
+        |
+        ├── api/
+        │   └── client.js
+        |
+        ├── context/
+        │   └── AuthContext.jsx
+        |
+        ├── components/
+        │   ├── Navbar.jsx
+        │   ├── BookingModal.jsx
+        │   ├── InvoiceModal.jsx
+        │   ├── StatusBadge.jsx
+        │   └── Toast.jsx
+        |
+        └── pages/
+            ├── HomePage.jsx
+            ├── LoginPage.jsx
+            ├── RegisterPage.jsx
+            ├── MyBookingsPage.jsx
+            ├── StaffDashboardPage.jsx
+            └── AdminDashboardPage.jsx
 ```
 
 ---
 
-## 📦 Mandatory 13 Modules Breakdown
+## Core Modules
 
-| # | Mandatory Module | Implemented Features |
-|---|---|---|
-| **1** | **Guest Registration & Auth** | Bcrypt hashing, JWT generation, unique email validation, role guards. |
-| **2** | **Hotel & Property Management** | CRUD for hotel properties, city-based queries, amenities & ratings. |
-| **3** | **Room Type & Inventory** | Room types with capacity, total room counts, and physical room tracking. |
-| **4** | **Availability Search Engine** | Real-time calculation based on non-overlapping active bookings. |
-| **5** | **Reservation Booking Workflow** | Atomic reservation creation, inventory locking, and overbooking prevention. |
-| **6** | **Dynamic Pricing Rules** | Seasonal/weekend multipliers applied and permanently snapshotted. |
-| **7** | **Booking Status Management** | Strict Finite State Machine: `Reserved` → `Confirmed` → `Checked-in` → `Checked-out` → `Cancelled`. |
-| **8** | **Check-in / Check-out** | Cleanliness check on check-in; timestamping and setting room dirty on checkout. |
-| **9** | **Housekeeping Status Tracking** | Cleanliness states (`clean`, `dirty`, `cleaning`, `maintenance`) gatekeeping check-ins. |
-| **10** | **Cancellation & Refund Policy** | 3-tier refund policy ($\ge 48$h: 100%, 24–48h: 50%, $<24$h: 0%). |
-| **11** | **Guest Booking History** | Guest-scoped personal booking retrieval; cross-user access forbidden. |
-| **12** | **Invoice Generation Summary** | Itemized breakdown: room charge, dynamic multiplier, 12% GST, refund details. |
-| **13** | **Admin Occupancy Reports** | MongoDB aggregation pipelines for occupancy percentage and net revenue. |
+The backend implements the following hotel reservation modules.
 
----
-
-## 🗄️ Database Schema & Indexes
-
-### Collections & Critical Fields
-
-1. **`users`**: `name`, `email` (unique index), `passwordHash` (`select: false`), `role` (`guest|staff|admin`), `hotelId` (for staff).
-2. **`hotels`**: `name`, `city` (index), `address`, `amenities`, `rating`, `isActive`. Compound index: `{ city: 1, isActive: 1 }`.
-3. **`roomtypes`**: `hotelId` (index), `name`, `basePrice`, `capacity`, `totalRooms`, `amenities`. Compound index: `{ hotelId: 1, name: 1 }` (unique).
-4. **`rooms`**: `hotelId` (index), `roomTypeId` (index), `roomNumber`, `housekeepingStatus` (`clean|dirty|cleaning|maintenance`), `lastCleanedAt`. Compound index: `{ hotelId: 1, roomNumber: 1 }` (unique).
-5. **`pricingrules`**: `hotelId` (index), `roomTypeId`, `name`, `season`, `startDate`, `endDate`, `multiplier`, `isActive`. Compound index: `{ hotelId: 1, isActive: 1, startDate: 1, endDate: 1 }`.
-6. **`bookings`**: `bookingNumber` (unique), `guestId` (index), `hotelId` (index), `roomTypeId` (index), `assignedRoomId`, `checkIn`, `checkOut`, `status`, `pricingSnapshot`, `cancellationDetails`. Compound availability index: `{ hotelId: 1, roomTypeId: 1, status: 1, checkIn: 1, checkOut: 1 }`.
+| #  | Module                              | Implementation                                     |
+| -- | ----------------------------------- | -------------------------------------------------- |
+| 1  | Guest Registration & Authentication | JWT, Bcrypt, validation, role-based access         |
+| 2  | Hotel & Property Management         | Hotel CRUD, city filtering, amenities, ratings     |
+| 3  | Room Type & Inventory               | Room types, capacity, pricing, physical rooms      |
+| 4  | Availability Search Engine          | Date-overlap based inventory calculation           |
+| 5  | Reservation Booking Workflow        | Availability validation and overbooking prevention |
+| 6  | Dynamic Pricing Rules               | Seasonal and weekend multipliers                   |
+| 7  | Booking Status Management           | Finite State Machine                               |
+| 8  | Check-in / Check-out                | Room assignment and stay lifecycle                 |
+| 9  | Housekeeping Tracking               | Clean, dirty, cleaning, maintenance states         |
+| 10 | Cancellation & Refund Policy        | Time-based refund calculation                      |
+| 11 | Guest Booking History               | Guest-scoped booking access                        |
+| 12 | Invoice Generation                  | Itemized charges, tax and refund details           |
+| 13 | Admin Reports                       | Occupancy, revenue and KPI aggregation             |
 
 ---
 
-## 🧠 Core Business Logic & Algorithms
+## Database Design
 
-### 1. Date Overlap Availability Formula
-Two date ranges $[A_{in}, A_{out}]$ and $[B_{in}, B_{out}]$ overlap if and only if:
-$$\text{existing.checkIn} < \text{requested.checkOut} \quad \text{AND} \quad \text{existing.checkOut} > \text{requested.checkIn}$$
-Active booking statuses that hold inventory: `['Reserved', 'Confirmed', 'Checked-in']`.  
-Available inventory: $\text{RoomType.totalRooms} - \text{Count}(\text{Overlapping Active Bookings})$.
+MongoDB is used as the primary database.
 
-### 2. Dynamic Pricing Snapshot
-$$\text{Base Total} = \text{basePricePerNight} \times \text{nights}$$
-$$\text{Subtotal} = \text{Base Total} \times \text{appliedMultiplier}$$
-$$\text{Tax (12\% GST)} = \text{Subtotal} \times 0.12$$
-$$\text{Total Amount} = \text{Subtotal} + \text{Tax}$$
-*Once a booking is created, the pricing is locked in `pricingSnapshot` inside MongoDB and never recalculated if future pricing rules change.*
+### Users
 
-### 3. Finite State Machine (FSM) Lifecycle
+Collection:
+
+```text
+users
 ```
-[Reserved] ────────► [Confirmed] ────────► [Checked-in] ────────► [Checked-out]
-    │                     │
-    ▼                     ▼
-[Cancelled]          [Cancelled]
+
+Fields:
+
+```text
+name
+email
+passwordHash
+role
+hotelId
+phone
 ```
-- Invalid transitions (e.g., `Confirmed` → `Checked-out` or `Checked-out` → `Cancelled`) return `400 Bad Request`.
 
-### 4. Cancellation & Refund Policy
-- **$\ge 48$ hours prior to check-in**: 100% refund, 0% fee.
-- **24 to 48 hours prior to check-in**: 50% refund, 50% fee.
-- **$< 24$ hours prior to check-in**: 0% refund, 100% fee.
-- **After check-in / check-out**: Non-cancellable.
+Roles:
 
----
+```text
+guest
+staff
+admin
+```
 
-## 🛡️ Role-Based Access & Scoping Matrix
+The email field has a unique index.
 
-| Role | Search & View Hotels | Book Rooms & View History | Manage Inventory & Housekeeping | Check-in / Check-out | Manage Properties & Rules | View Analytics Reports |
-|---|:---:|:---:|:---:|:---:|:---:|:---:|
-| **Guest** | ✅ | ✅ (Own Only) | ❌ | ❌ | ❌ | ❌ |
-| **Staff** | ✅ | ❌ | ✅ (Assigned Hotel) | ✅ (Assigned Hotel) | ❌ | ❌ |
-| **Admin** | ✅ | ✅ | ✅ (All Hotels) | ✅ (All Hotels) | ✅ | ✅ |
+Passwords are stored as Bcrypt hashes and are never stored in plain text.
 
 ---
 
-## 🌐 Complete API Route Catalog
+### Hotels
 
-### 1. Authentication (`/api/auth`)
-- `POST /api/auth/register` — Register Guest / Staff
-- `POST /api/auth/login` — Authenticate and receive JWT
-- `GET /api/auth/profile` — Get authenticated user details
+Collection:
 
-### 2. Hotels (`/api/hotels`)
-- `GET /api/hotels` — Public hotel search (optional `?city=...`)
-- `GET /api/hotels/:id` — Public hotel details
-- `POST /api/hotels` — Admin create hotel
-- `PUT /api/hotels/:id` — Admin update hotel
-- `DELETE /api/hotels/:id` — Admin deactivate hotel
+```text
+hotels
+```
 
-### 3. Room Types (`/api/hotels/:hotelId/room-types` & `/api/room-types`)
-- `GET /api/hotels/:hotelId/room-types` — Public list of room types for a hotel
-- `POST /api/hotels/:hotelId/room-types` — Admin create room type
-- `PUT /api/room-types/:id` — Admin update room type
-- `DELETE /api/room-types/:id` — Admin deactivate room type
+Fields:
 
-### 4. Physical Rooms (`/api/rooms`)
-- `GET /api/rooms` — Staff / Admin list physical rooms
-- `POST /api/rooms` — Staff / Admin add physical room
-- `PUT /api/rooms/:id` — Staff / Admin update room details
+```text
+name
+city
+address
+amenities
+rating
+contactEmail
+contactPhone
+isActive
+```
 
-### 5. Availability Engine (`/api/availability`)
-- `GET /api/availability/search?city=...&checkIn=...&checkOut=...&guests=...` — Search availability
-- `GET /api/availability/check?roomTypeId=...&checkIn=...&checkOut=...` — Real-time remaining count
+Indexes include:
 
-### 6. Dynamic Pricing Rules (`/api/pricing-rules`)
-- `GET /api/pricing-rules` — Admin list pricing rules
-- `POST /api/pricing-rules` — Admin create multiplier rule
-- `PUT /api/pricing-rules/:id` — Admin update rule
-- `DELETE /api/pricing-rules/:id` — Admin deactivate rule
-
-### 7. Bookings & Lifecycle (`/api/bookings`)
-- `POST /api/bookings` — Create reservation
-- `GET /api/bookings/my-bookings` — Guest personal booking history
-- `GET /api/bookings` — Staff / Admin list all bookings
-- `GET /api/bookings/:id` — View single booking details
-- `PUT /api/bookings/:id/confirm` — Transition to `Confirmed`
-- `PUT /api/bookings/:id/checkin` — Check-in (assigns clean room, `Checked-in`)
-- `PUT /api/bookings/:id/checkout` — Check-out (sets room to dirty, `Checked-out`)
-- `PUT /api/bookings/:id/cancel` — Cancel reservation with refund calculation
-
-### 8. Housekeeping (`/api/housekeeping`)
-- `GET /api/housekeeping/rooms` — Staff / Admin view room statuses
-- `PUT /api/housekeeping/rooms/:id/status` — Update status (`clean`, `dirty`, `cleaning`, `maintenance`)
-
-### 9. Invoices (`/api/invoices`)
-- `GET /api/invoices/:bookingId` — Get itemized invoice breakdown
-
-### 10. Reports (`/api/reports`)
-- `GET /api/reports/occupancy?startDate=...&endDate=...` — Aggregated occupancy rate report
-- `GET /api/reports/revenue?startDate=...&endDate=...` — Gross/net revenue aggregation report
-- `GET /api/reports/dashboard` — Executive KPI dashboard
+```text
+city
+{ city: 1, isActive: 1 }
+```
 
 ---
 
-## 🚀 Setup & Installation Guide
+### Room Types
+
+Collection:
+
+```text
+roomtypes
+```
+
+Fields:
+
+```text
+hotelId
+name
+description
+basePrice
+capacity
+totalRooms
+amenities
+isActive
+```
+
+Compound uniqueness:
+
+```text
+{ hotelId: 1, name: 1 }
+```
+
+---
+
+### Physical Rooms
+
+Collection:
+
+```text
+rooms
+```
+
+Each document represents an individual physical hotel room.
+
+Fields:
+
+```text
+hotelId
+roomTypeId
+roomNumber
+floor
+housekeepingStatus
+lastCleanedAt
+```
+
+Housekeeping states:
+
+```text
+clean
+dirty
+cleaning
+maintenance
+```
+
+Room numbers are unique within a hotel.
+
+---
+
+### Pricing Rules
+
+Collection:
+
+```text
+pricingrules
+```
+
+Fields:
+
+```text
+hotelId
+roomTypeId
+name
+season
+startDate
+endDate
+multiplier
+isActive
+```
+
+Pricing rules can apply to:
+
+* An entire hotel
+* A specific room type
+* A defined date range
+
+---
+
+### Bookings
+
+Collection:
+
+```text
+bookings
+```
+
+Fields:
+
+```text
+bookingNumber
+guestId
+hotelId
+roomTypeId
+assignedRoomId
+checkIn
+checkOut
+guestCount
+status
+pricingSnapshot
+statusHistory
+cancellationDetails
+actualCheckIn
+actualCheckOut
+```
+
+The booking collection contains an availability-focused compound index:
+
+```text
+{
+  hotelId: 1,
+  roomTypeId: 1,
+  status: 1,
+  checkIn: 1,
+  checkOut: 1
+}
+```
+
+---
+
+## Core Business Logic
+
+### Availability Calculation
+
+Two reservations overlap when:
+
+```text
+existing.checkIn < requested.checkOut
+AND
+existing.checkOut > requested.checkIn
+```
+
+Only bookings with the following statuses consume inventory:
+
+```text
+Reserved
+Confirmed
+Checked-in
+```
+
+Therefore:
+
+```text
+Available Rooms
+=
+Total Rooms
+-
+Number of Overlapping Active Bookings
+```
+
+Example:
+
+```text
+Room Type Inventory = 5
+
+Active overlapping bookings = 3
+
+Available Rooms = 5 - 3 = 2
+```
+
+---
+
+## Dynamic Pricing
+
+The system calculates pricing using the applicable pricing multiplier.
+
+```text
+Base Total
+=
+Base Price Per Night × Number of Nights
+```
+
+```text
+Subtotal
+=
+Base Total × Applied Multiplier
+```
+
+```text
+GST
+=
+Subtotal × Tax Rate
+```
+
+```text
+Final Total
+=
+Subtotal + GST
+```
+
+The default tax rate is:
+
+```text
+12%
+```
+
+### Example
+
+```text
+Base price = $200/night
+Stay = 2 nights
+Multiplier = 1.25x
+GST = 12%
+```
+
+Calculation:
+
+```text
+Base Total = 200 × 2
+           = $400
+
+Subtotal = 400 × 1.25
+         = $500
+
+GST = 500 × 0.12
+    = $60
+
+Final Total = $560
+```
+
+---
+
+## Pricing Snapshot
+
+When a booking is created, its calculated price is stored inside:
+
+```text
+pricingSnapshot
+```
+
+Example:
+
+```json
+{
+  "nights": 2,
+  "basePricePerNight": 200,
+  "appliedMultiplier": 1.25,
+  "subtotal": 500,
+  "taxRatePercent": 12,
+  "taxAmount": 60,
+  "totalAmount": 560
+}
+```
+
+This prevents future pricing-rule changes from modifying existing reservations.
+
+The price at the time of booking remains fixed for that reservation.
+
+---
+
+## Booking Finite State Machine
+
+The booking lifecycle follows a strict Finite State Machine.
+
+```text
+                    +---------------+
+                    |    Reserved   |
+                    +-------+-------+
+                            |
+                            v
+                    +---------------+
+                    |   Confirmed   |
+                    +-------+-------+
+                            |
+                            v
+                    +---------------+
+                    |  Checked-in   |
+                    +-------+-------+
+                            |
+                            v
+                    +---------------+
+                    | Checked-out   |
+                    +---------------+
+
+Reserved -----------------> Cancelled
+Confirmed -----------------> Cancelled
+```
+
+Invalid transitions are rejected.
+
+For example:
+
+```text
+Confirmed -> Checked-out
+```
+
+is invalid because the guest must be checked in first.
+
+The API returns:
+
+```text
+400 Bad Request
+```
+
+for invalid state transitions.
+
+---
+
+## Housekeeping Workflow
+
+Every physical room maintains a housekeeping state.
+
+```text
+Clean
+  |
+  v
+Assigned / Checked-in
+  |
+  v
+Checked-out
+  |
+  v
+Dirty
+  |
+  v
+Cleaning
+  |
+  v
+Clean
+```
+
+A room marked as:
+
+```text
+dirty
+cleaning
+maintenance
+```
+
+cannot be used for guest check-in.
+
+This ensures that front-desk operations respect the physical condition of hotel rooms.
+
+---
+
+## Cancellation & Refund Policy
+
+The platform uses a three-tier cancellation policy.
+
+| Time Before Check-in | Refund |  Fee |
+| -------------------- | -----: | ---: |
+| 48 hours or more     |   100% |   0% |
+| 24–48 hours          |    50% |  50% |
+| Less than 24 hours   |     0% | 100% |
+
+Bookings that have already reached:
+
+```text
+Checked-in
+Checked-out
+```
+
+cannot be cancelled.
+
+Refund information is stored in the booking's cancellation details and reflected in the invoice.
+
+---
+
+## Frontend
+
+AuraStays includes a React-based frontend built with Vite.
+
+### Guest Interface
+
+The guest-facing interface provides:
+
+* Hotel search
+* Room availability
+* Pricing information
+* Booking modal
+* Booking confirmation
+* Booking history
+* Cancellation
+* Invoice viewing
+* Authentication
+
+### Staff Dashboard
+
+The staff portal provides two primary workspaces.
+
+#### Front Desk
+
+* Active reservations
+* Guest check-in
+* Room assignment
+* Guest check-out
+* Automatic dirty-room marking
+
+#### Housekeeping Board
+
+* View room status
+* Update room cleanliness
+* Manage cleaning workflow
+* Identify rooms under maintenance
+
+### Admin Dashboard
+
+The admin portal provides:
+
+#### Overview KPIs
+
+* Net revenue
+* Platform-level statistics
+* Property performance
+
+#### Occupancy Report
+
+* Select reporting date range
+* Calculate occupancy
+* View aggregated results
+
+#### Revenue Aggregation
+
+* Gross revenue
+* Refund deductions
+* Net revenue
+* Tax-related metrics
+
+#### Pricing Rules
+
+* View pricing rules
+* Create new rules
+* Manage seasonal multipliers
+
+---
+
+## Frontend Route Protection
+
+React Router protects role-specific routes.
+
+```text
+/                  -> Public
+/login             -> Public
+/register          -> Public
+/my-bookings       -> Guest
+
+/staff/*           -> Staff + Admin
+
+/admin/*           -> Admin only
+```
+
+Unauthorized users are redirected to:
+
+```text
+/login
+```
+
+---
+
+## API Documentation
+
+All API endpoints are prefixed with:
+
+```text
+/api
+```
+
+Base URL during local development:
+
+```text
+http://localhost:5000/api
+```
+
+---
+
+### Health Check
+
+```http
+GET /api/health
+```
+
+Returns system status and confirms that the platform modules are available.
+
+---
+
+### Authentication
+
+#### Register
+
+```http
+POST /api/auth/register
+```
+
+#### Login
+
+```http
+POST /api/auth/login
+```
+
+#### Profile
+
+```http
+GET /api/auth/profile
+```
+
+---
+
+### Hotels
+
+```http
+GET    /api/hotels
+GET    /api/hotels/:id
+POST   /api/hotels
+PUT    /api/hotels/:id
+DELETE /api/hotels/:id
+```
+
+Hotel listing supports optional city filtering:
+
+```text
+/api/hotels?city=New%20York
+```
+
+---
+
+### Room Types
+
+```http
+GET    /api/hotels/:hotelId/room-types
+POST   /api/hotels/:hotelId/room-types
+GET    /api/room-types/:id
+PUT    /api/room-types/:id
+DELETE /api/room-types/:id
+```
+
+---
+
+### Physical Rooms
+
+```http
+GET  /api/rooms
+POST /api/rooms
+PUT  /api/rooms/:id
+```
+
+---
+
+### Availability
+
+#### Search
+
+```http
+GET /api/availability/search
+```
+
+Example:
+
+```text
+/api/availability/search?city=New%20York&checkIn=2026-10-10&checkOut=2026-10-12&guests=2
+```
+
+#### Check Specific Room Type
+
+```http
+GET /api/availability/check
+```
+
+---
+
+### Dynamic Pricing Rules
+
+```http
+GET    /api/pricing-rules
+POST   /api/pricing-rules
+PUT    /api/pricing-rules/:id
+DELETE /api/pricing-rules/:id
+```
+
+---
+
+### Bookings
+
+#### Create Reservation
+
+```http
+POST /api/bookings
+```
+
+#### Guest Booking History
+
+```http
+GET /api/bookings/my-bookings
+```
+
+#### All Bookings
+
+```http
+GET /api/bookings
+```
+
+#### Single Booking
+
+```http
+GET /api/bookings/:id
+```
+
+#### Confirm
+
+```http
+PUT /api/bookings/:id/confirm
+```
+
+#### Check-in
+
+```http
+PUT /api/bookings/:id/checkin
+```
+
+#### Check-out
+
+```http
+PUT /api/bookings/:id/checkout
+```
+
+#### Cancel
+
+```http
+PUT /api/bookings/:id/cancel
+```
+
+---
+
+### Housekeeping
+
+```http
+GET /api/housekeeping/rooms
+PUT /api/housekeeping/rooms/:id/status
+```
+
+---
+
+### Invoices
+
+```http
+GET /api/invoices/:bookingId
+```
+
+Returns an itemized invoice containing applicable room charges, pricing multiplier, tax, total amount, and refund information when applicable.
+
+---
+
+### Reports
+
+#### Dashboard
+
+```http
+GET /api/reports/dashboard
+```
+
+#### Occupancy
+
+```http
+GET /api/reports/occupancy?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD
+```
+
+#### Revenue
+
+```http
+GET /api/reports/revenue?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD
+```
+
+Reports use MongoDB aggregation pipelines for database-side calculations.
+
+---
+
+## Authentication & Authorization
+
+The platform uses JWT authentication.
+
+After login, the API returns a token:
+
+```text
+Bearer <JWT>
+```
+
+The frontend stores the token and automatically injects it into API requests.
+
+Example:
+
+```http
+Authorization: Bearer eyJhbGciOi...
+```
+
+Authorization is enforced using middleware.
+
+```text
+authenticateJWT
+       |
+       v
+authorizeRoles
+       |
+       v
+scopeHotelStaff
+       |
+       v
+Controller
+```
+
+---
+
+## Security
+
+The backend includes several security measures:
+
+* JWT authentication
+* Bcrypt password hashing
+* Role-based authorization
+* Hotel-level staff authorization
+* Joi input validation
+* Helmet security headers
+* CORS configuration
+* Centralized error handling
+* Unique email constraints
+* Protected guest booking access
+* Protected administrative endpoints
+* Server-side business-rule validation
+
+Passwords are never returned as plain text.
+
+---
+
+## Environment Variables
+
+Create a `.env` file in the project root.
+
+Example:
+
+```env
+PORT=5000
+NODE_ENV=development
+MONGO_URI=mongodb://127.0.0.1:27017/hotel_booking_db
+JWT_SECRET=your_secret_key
+JWT_EXPIRES_IN=7d
+TAX_RATE_PERCENT=12
+```
+
+### Environment Variable Reference
+
+| Variable           | Purpose                   | Example                                      |
+| ------------------ | ------------------------- | -------------------------------------------- |
+| `PORT`             | Backend server port       | `5000`                                       |
+| `NODE_ENV`         | Runtime environment       | `development`                                |
+| `MONGO_URI`        | MongoDB connection string | `mongodb://127.0.0.1:27017/hotel_booking_db` |
+| `JWT_SECRET`       | JWT signing secret        | `your_secret_key`                            |
+| `JWT_EXPIRES_IN`   | Token lifetime            | `7d`                                         |
+| `TAX_RATE_PERCENT` | GST/tax percentage        | `12`                                         |
+
+Never commit a production `.env` file or real JWT secrets to Git.
+
+---
+
+## Setup & Installation
 
 ### Prerequisites
-- Node.js (v18+)
-- npm (v9+)
-- MongoDB (Local daemon or cloud Atlas URI). *Note: The app includes an embedded In-Memory MongoDB fallback for instant demonstration if local MongoDB daemon is not running.*
 
-### Installation Steps
+Install:
+
+* Node.js 18+
+* npm 9+
+* MongoDB local installation or MongoDB Atlas
+
+### 1. Clone the Repository
+
 ```bash
-# 1. Clone or navigate to the project directory
-cd "Hotel Room Booking & Reservation Platform"
+git clone <repository-url>
+cd hotel-room-booking-reservation-platform
+```
 
-# 2. Install dependencies
+### 2. Install Backend Dependencies
+
+```bash
 npm install
+```
 
-# 3. Configure environment variables
-# Copy .env.example to .env (already configured for local development)
+### 3. Configure Environment Variables
 
-# 4. Seed the database with realistic demo data
-npm run seed
+Create `.env` from `.env.example`.
 
-# 5. Run the automated End-to-End Test Suite (Tests all 13 modules)
-npm test
+Linux/macOS:
 
-# 6. Start the development server
-npm run dev
-# Server runs on: http://localhost:5000/api
+```bash
+cp .env.example .env
+```
+
+Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Update the MongoDB URI and JWT secret if required.
+
+### 4. Install Frontend Dependencies
+
+```bash
+cd client
+npm install
+cd ..
 ```
 
 ---
 
-## 📮 Postman Testing & Seed Data
+## Running the Application
 
-A ready-to-import Postman Collection is located at:  
-`postman/Hotel_Reservation_Platform.postman_collection.json`
+The project consists of two development servers.
 
-### Pre-configured Seed Accounts:
-| Role | Email | Password | Assigned Scope |
-|---|---|---|---|
-| **Admin** | `admin@hotelchain.com` | `admin123` | Global Management |
-| **Staff (NY)** | `staff.ny@hotelchain.com` | `staff123` | Grand Palace Manhattan |
-| **Staff (LA)** | `staff.la@hotelchain.com` | `staff123` | Pacific Sunset LA |
-| **Guest 1** | `john.doe@example.com` | `guest123` | Personal Bookings |
-| **Guest 2** | `alice.smith@example.com` | `guest123` | Personal Bookings |
+### Backend
+
+From the project root:
+
+```bash
+npm run dev
+```
+
+Backend:
+
+```text
+http://localhost:5000
+```
+
+API:
+
+```text
+http://localhost:5000/api
+```
+
+### Frontend
+
+Open a second terminal:
+
+```bash
+cd client
+npm run dev
+```
+
+Frontend:
+
+```text
+http://localhost:5173
+```
+
+The Vite development server proxies `/api` requests to:
+
+```text
+http://localhost:5000
+```
 
 ---
 
-## 🎓 Viva Questions & Defense Guide
+## Demo Accounts
 
-**Q1: How do you prevent double-booking when two guests book the same room simultaneously?**  
-> **Ans:** We calculate overlapping active bookings in real-time (`checkIn < req.checkOut && checkOut > req.checkIn`) against the room type's `totalRooms`. The check and booking creation occur within an atomic database operation, rejecting requests with `409 Conflict` if available rooms $\le 0$.
+| Role  | Email                     | Password   | Scope                       |
+| ----- | ------------------------- | ---------- | --------------------------- |
+| Admin | `admin@hotelchain.com`    | `admin123` | All hotels                  |
+| Staff | `staff.ny@hotelchain.com` | `staff123` | Grand Palace Manhattan      |
+| Staff | `staff.la@hotelchain.com` | `staff123` | Pacific Sunset Ocean Resort |
+| Guest | `john.doe@example.com`    | `guest123` | Personal bookings           |
+| Guest | `alice.smith@example.com` | `guest123` | Personal bookings           |
 
-**Q2: Why do you snapshot pricing on the booking document?**  
-> **Ans:** If seasonal or weekend dynamic pricing rules change in the future, past or confirmed bookings must not change their historical charged price. Storing an immutable `pricingSnapshot` subdocument guarantees financial consistency and auditable invoices.
+These credentials are intended for local demonstration and testing only.
 
-**Q3: How is staff scoping enforced across hotel branches?**  
-> **Ans:** Through custom `scopeHotelStaff` middleware. When a staff user logs in, their JWT contains their assigned `hotelId`. Any attempt by staff from Hotel A to create rooms, check-in guests, or update housekeeping for Hotel B is rejected with `403 Forbidden`.
+---
 
-**Q4: How does MongoDB Aggregation optimize reporting queries?**  
-> **Ans:** Instead of pulling thousands of booking documents into Node.js memory, we execute `$match`, `$group`, `$lookup`, and `$project` pipeline stages directly inside the database engine to compute occupancy percentages, tax collected, refunds, and net revenue in milliseconds.
+## Seed Data
+
+The project includes realistic demonstration data.
+
+Run:
+
+```bash
+npm run seed
+```
+
+The seeder creates:
+
+* 2 hotels
+* Admin account
+* 2 staff accounts
+* 2 guest accounts
+* 4 room types
+* Physical rooms
+* Dynamic pricing rules
+* Sample bookings demonstrating multiple lifecycle states
+
+The server also automatically seeds the database when it starts and detects an empty database.
+
+### Destroy Seed Data
+
+```bash
+npm run seed:destroy
+```
+
+Use this carefully because the command removes the seeded application data.
+
+---
+
+## Testing
+
+The project contains an end-to-end test suite covering the major hotel reservation workflows.
+
+Run:
+
+```bash
+npm test
+```
+
+The test suite covers scenarios including:
+
+```text
+Health check
+Guest registration
+Duplicate email rejection
+Login authentication
+Invalid password rejection
+Role-based authorization
+Hotel creation
+Hotel listing
+Staff hotel scoping
+Room type creation
+Physical room creation
+Cross-hotel access prevention
+Dynamic pricing
+Availability calculation
+Reservation creation
+Overbooking prevention
+Booking FSM transitions
+Invalid FSM transitions
+Dirty-room check-in prevention
+Clean-room check-in
+Check-out workflow
+Housekeeping updates
+Cancellation/refund logic
+Guest booking isolation
+Invoice generation
+Occupancy reporting
+Revenue reporting
+```
+
+The test suite uses MongoDB Memory Server where applicable, allowing tests to run without depending on a persistent production database.
+
+---
+
+## Postman Collection
+
+A ready-to-import Postman collection is included at:
+
+```text
+postman/Hotel_Reservation_Platform.postman_collection.json
+```
+
+Import this file into Postman to test the REST API manually.
+
+Recommended testing order:
+
+```text
+1. Health Check
+       |
+       v
+2. Register / Login
+       |
+       v
+3. Hotel APIs
+       |
+       v
+4. Room Type APIs
+       |
+       v
+5. Room APIs
+       |
+       v
+6. Availability
+       |
+       v
+7. Pricing Rules
+       |
+       v
+8. Create Booking
+       |
+       v
+9. Confirm Booking
+       |
+       v
+10. Check-in
+       |
+       v
+11. Check-out
+       |
+       v
+12. Invoice
+       |
+       v
+13. Reports
+```
+
+---
+
+## API Response Format
+
+The backend uses standardized API response helpers.
+
+Successful responses follow a consistent structure similar to:
+
+```json
+{
+  "success": true,
+  "message": "Operation successful",
+  "data": {}
+}
+```
+
+Common HTTP status codes include:
+
+| Status | Meaning                                         |
+| ------ | ----------------------------------------------- |
+| `200`  | Successful request                              |
+| `201`  | Resource created                                |
+| `400`  | Invalid request or business rule violation      |
+| `401`  | Authentication required or invalid credentials  |
+| `403`  | Insufficient permissions                        |
+| `404`  | Resource not found                              |
+| `409`  | Conflict, such as overbooking or duplicate data |
+| `500`  | Internal server error                           |
+
+---
+
+## Overbooking Prevention
+
+The booking engine verifies inventory before creating a reservation.
+
+For example:
+
+```text
+Total rooms = 2
+
+Booking A
+    |
+    +----------------+
+
+Booking B
+    |
+    +----------------+
+
+Available rooms = 0
+```
+
+A third overlapping reservation is rejected with:
+
+```text
+409 Conflict
+```
+
+This prevents reservations from exceeding available room inventory.
+
+---
+
+## MongoDB Aggregation
+
+Administrative reports are calculated using MongoDB aggregation pipelines instead of loading all booking records into application memory.
+
+Typical aggregation stages include:
+
+```text
+$match
+   |
+   v
+$group
+   |
+   v
+$lookup
+   |
+   v
+$project
+```
+
+This allows the database engine to calculate:
+
+* Occupancy
+* Booking counts
+* Gross revenue
+* Refund deductions
+* Net revenue
+* Tax-related metrics
+
+directly against stored data.
+
+---
+
+## Separation of Responsibilities
+
+The application separates business logic from HTTP handling.
+
+### Routes
+
+Define API endpoints.
+
+```text
+/routes
+```
+
+### Middleware
+
+Handles:
+
+* Authentication
+* Authorization
+* Hotel scoping
+* Validation
+* Error handling
+
+```text
+/middleware
+```
+
+### Controllers
+
+Handle the request-response lifecycle:
+
+```text
+Request -> Service -> Response
+```
+
+```text
+/controllers
+```
+
+### Services
+
+Contain business rules such as:
+
+* Availability
+* Pricing
+* Booking lifecycle
+* Cancellation
+* Housekeeping
+* Reports
+
+```text
+/services
+```
+
+### Models
+
+Define MongoDB schemas, validation, relationships, and indexes.
+
+```text
+/models
+```
+
+This structure improves maintainability, testability, and separation of concerns.
+
+---
+
+## Viva / Technical Highlights
+
+### How does the system prevent overbooking?
+
+The availability engine checks overlapping active bookings using:
+
+```text
+existing.checkIn < requested.checkOut
+AND
+existing.checkOut > requested.checkIn
+```
+
+The number of overlapping active bookings is compared with the room type inventory before a reservation is created.
+
+If no inventory remains, the request is rejected with `409 Conflict`.
+
+---
+
+### Why is pricing stored as a snapshot?
+
+Dynamic pricing rules can change over time.
+
+If a guest books a room at:
+
+```text
+1.25x
+```
+
+and an administrator later changes the rule to:
+
+```text
+1.50x
+```
+
+the existing reservation must retain its original price.
+
+Therefore, calculated pricing information is stored in `pricingSnapshot`.
+
+---
+
+### How is the booking lifecycle controlled?
+
+A Finite State Machine defines legal booking transitions:
+
+```text
+Reserved
+   |
+   v
+Confirmed
+   |
+   v
+Checked-in
+   |
+   v
+Checked-out
+```
+
+Cancellation is allowed only from appropriate pre-stay states.
+
+Invalid transitions are rejected by the service layer.
+
+---
+
+### How is staff access restricted?
+
+Each staff account is associated with a specific:
+
+```text
+hotelId
+```
+
+The authorization middleware verifies that the requested resource belongs to the staff member's assigned hotel.
+
+Therefore:
+
+```text
+NY Staff -> NY Hotel    = Allowed
+NY Staff -> LA Hotel    = Forbidden
+```
+
+---
+
+### Why use MongoDB aggregation for reports?
+
+Aggregation allows calculations to happen inside MongoDB rather than transferring large datasets into Node.js.
+
+This is more efficient for:
+
+* Filtering
+* Grouping
+* Joining
+* Revenue calculation
+* Occupancy calculation
+
+---
+
+### Why use a service layer?
+
+The service layer keeps business logic independent from HTTP-specific code.
+
+For example:
+
+```text
+Controller
+   |
+   v
+booking.service.js
+   |
+   +--> availability.service.js
+   |
+   +--> pricing.service.js
+   |
+   v
+MongoDB
+```
+
+This improves:
+
+* Maintainability
+* Reusability
+* Testing
+* Separation of concerns
+
+---
+
+## Future Enhancements
+
+Possible extensions include:
+
+* Online payment gateway integration
+* Email booking confirmations
+* SMS notifications
+* Password reset
+* Guest reviews and ratings
+* Hotel image uploads
+* Advanced room search filters
+* Coupon and promotional codes
+* Loyalty and rewards system
+* Multi-currency support
+* Multi-language support
+* Calendar-based booking UI
+* Real-time notifications
+* WebSocket-based front-desk updates
+* Advanced revenue management
+* Docker deployment
+* Cloud hosting
+* CI/CD pipeline
+* Production monitoring and logging
+
+---
+
+## Project Status
+
+| Component                |  Status  |
+| ------------------------ | :------: |
+| Backend API              | Complete |
+| MongoDB Database         | Complete |
+| JWT Authentication       | Complete |
+| Role-Based Authorization | Complete |
+| Hotel Management         | Complete |
+| Room Inventory           | Complete |
+| Availability Engine      | Complete |
+| Dynamic Pricing          | Complete |
+| Booking FSM              | Complete |
+| Check-in / Check-out     | Complete |
+| Housekeeping             | Complete |
+| Cancellation / Refunds   | Complete |
+| Invoice Generation       | Complete |
+| Admin Analytics          | Complete |
+| React Frontend           | Complete |
+| Guest Portal             | Complete |
+| Staff Dashboard          | Complete |
+| Admin Dashboard          | Complete |
+| Postman Collection       | Complete |
+| E2E Test Suite           | Complete |
+
+---
+
+## Academic Project
+
+**Project:** P03 — Hotel Room Booking & Reservation Platform
+**Course:** 5th Semester CIA-3
+**Domain:** Hospitality & Tourism
+**Architecture:** Layered Architecture with Service Layer
+**Database:** MongoDB
+**Frontend:** React + Vite
+**Backend:** Node.js + Express.js
+
+---
+
+## Summary
+
+AuraStays is a full-stack hotel room booking and reservation platform that combines a React frontend with a structured Express.js and MongoDB backend.
+
+The project demonstrates:
+
+```text
+REST APIs
+JWT Authentication
+Role-Based Access Control
+Database Design
+MongoDB Indexing
+MongoDB Aggregation Pipelines
+Service-Layer Architecture
+Finite State Machines
+Dynamic Pricing
+Inventory Management
+Overbooking Prevention
+Housekeeping Workflows
+Refund Calculation
+Invoice Generation
+Automated E2E Testing
+```
+
+The platform covers the complete hotel reservation lifecycle, from room discovery and availability checking through reservation, check-in, stay management, checkout, cancellation, invoicing, and administrative reporting.
